@@ -1,0 +1,4 @@
+# The task should fail as the threshold was exceeded
+> checkWarningThreshold
+# The threshold should have been reduced
+$ must-mirror warningThreshold.sbt resources/updatedWarningThreshold.sbt

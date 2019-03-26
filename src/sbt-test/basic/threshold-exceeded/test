@@ -1,0 +1,2 @@
+# The task should fail as the threshold was exceeded
+-> checkWarningThreshold

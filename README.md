@@ -1,2 +1,48 @@
-# sbt-warning-threshold
-A floating threshold for compiler warnings
+# sbt-sammy
+
+A friendly policeman to help reduce your compiler warnings.
+
+> Tomorrow the sun will come up again, and I'm pretty sure that whatever happens we won't have found Freedom, and there won't be a whole lot of Justice, and I'm damn sure we won't have found Truth. But it's just possible that I might get a hard-boiled egg.
+ - Sam Vimes, from Night Watch, Terry Pratchett
+
+In a perfect world, all projects would start off life with [@tpolecat's scala compiler options](https://tpolecat.github.io/2017/04/25/scalac-flags.html) and we would never encounter compiler warnings.  In reality, we have to delve into mature, imperfect codebases where the lofty heights of `Xfatal-warnings` are difficult to achieve.  We have to take a pragmatic approach to cleaning these up.
+
+`sbt-sammy` prevents you from making your codebase worse by enforcing a warning threshold.  This threshold decreases whenever you make improvements, nudging you to take small steps to `-Xfatal-warnings`.
+
+# To use
+
+Add this to your `project/plugins.sbt` or as a global plugin in `~/.sbt/1.0/plugins/plugins.sbt`:
+
+```
+addSbtPlugin("com.github.zainab-ali" % "sbt-sammmy" % "0.1.0")
+```
+
+(NOTE: this hasn't been released yet)
+
+# Setup
+
+## With a floating threshold (recommended)
+
+`sbt-sammy` can reduce its warning threshold to the maximum number of warnings in your codebase.  This means that each time you make a positive change, you can reduce your warning threshold.
+
+If you want to do this:
+
+1. Create a `sammy.sbt` file next to your `build.sbt` with the following contents:
+   ```
+   sammyWarningThreshold := 1000
+   ```
+2. Run `sbt policeWarnings`
+   The warning threshold should decrease to the maximum number of warnings in your project.
+
+## With a fixed threshold
+
+If you would like to enforce a fixed threshold that `sbt-sammy` won't reduce then add the following to your `build.sbt`:
+
+```
+sammyWarningFile := Nonw
+sammyWarningThreshold := yourFixedThreshold
+```
+
+# Run
+
+Run `sbt policeWarnings`.  This task will fail if the number of warnings exceeds the threshold.
