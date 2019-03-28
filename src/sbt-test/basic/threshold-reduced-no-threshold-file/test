@@ -1,4 +1,4 @@
 # The task should succeed as the threshold was met
-> checkWarningThreshold
+> policeWarnings
 # The threshold file should not have been written
--$ exists warningThreshold.sbt
+-$ exists sammy.sbt

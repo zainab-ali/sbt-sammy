@@ -1,1 +1,1 @@
-warningThreshold in ThisBuild := 5
+sammyWarningThreshold in ThisBuild := 5

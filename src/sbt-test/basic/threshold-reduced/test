@@ -1,4 +1,4 @@
 # The task should fail as the threshold was exceeded
-> checkWarningThreshold
+> policeWarnings
 # The threshold should have been reduced
-$ must-mirror warningThreshold.sbt resources/updatedWarningThreshold.sbt
+$ must-mirror sammy.sbt resources/updatedSammy.sbt

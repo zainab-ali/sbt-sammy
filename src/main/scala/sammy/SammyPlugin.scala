@@ -86,7 +86,7 @@ object Sammy {
   /** Writes the sbt warning threshold setting to a file */
   private def writeWarningThreshold(file: File, warningThreshold: Int): Unit = {
     val warningThresholdString =
-      s"warningThreshold in ThisBuild := $warningThreshold"
+      s"sammyWarningThreshold in ThisBuild := $warningThreshold"
     IO.writeLines(file, Seq(warningThresholdString))
   }
 }
