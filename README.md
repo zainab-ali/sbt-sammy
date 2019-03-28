@@ -2,8 +2,9 @@
 
 A friendly policeman to help reduce your compiler warnings.
 
+
 > Tomorrow the sun will come up again, and I'm pretty sure that whatever happens we won't have found Freedom, and there won't be a whole lot of Justice, and I'm damn sure we won't have found Truth. But it's just possible that I might get a hard-boiled egg.
- - Sam Vimes, from Night Watch, Terry Pratchett
+> -- Sam Vimes, from Night Watch, Terry Pratchett
 
 In a perfect world, all projects would start off life with [@tpolecat's scala compiler options](https://tpolecat.github.io/2017/04/25/scalac-flags.html) and we would never encounter compiler warnings.  In reality, we have to delve into mature, imperfect codebases where the lofty heights of `Xfatal-warnings` are difficult to achieve.  We have to take a pragmatic approach to cleaning these up.
 
@@ -39,7 +40,7 @@ If you want to do this:
 If you would like to enforce a fixed threshold that `sbt-sammy` won't reduce then add the following to your `build.sbt`:
 
 ```
-sammyWarningFile := Nonw
+sammyWarningFile := None
 sammyWarningThreshold := yourFixedThreshold
 ```
 
