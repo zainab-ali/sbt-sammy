@@ -1,7 +1,10 @@
 # sbt-sammy
 
-A friendly policeman to help reduce your compiler warnings.
+[![Build Status](https://travis-ci.org/zainab-ali/sbt-sammy.svg?branch=master)](https://travis-ci.org/zainab-ali/sbt-sammy)
 
+[![Version](https://api.bintray.com/packages/zainab-ali/sbt-plugins/sbt-sammy/images/download.svg)](https://bintray.com/zainab-ali/sbt-plugins/sbt-sammy/_latestVersion)
+
+A friendly policeman to help reduce your compiler warnings.
 
 > Tomorrow the sun will come up again, and I'm pretty sure that whatever happens we won't have found Freedom, and there won't be a whole lot of Justice, and I'm damn sure we won't have found Truth. But it's just possible that I might get a hard-boiled egg.
 > -- Sam Vimes, from Night Watch, Terry Pratchett
@@ -15,10 +18,10 @@ In a perfect world, all projects would start off life with [@tpolecat's scala co
 Add this to your `project/plugins.sbt` or as a global plugin in `~/.sbt/1.0/plugins/plugins.sbt`:
 
 ```
-addSbtPlugin("com.github.zainab-ali" % "sbt-sammmy" % "0.1.0")
+addSbtPlugin("com.github.zainab-ali" % "sbt-sammmy" % version)
 ```
 
-(NOTE: this hasn't been released yet)
+Where `version` is set to the latest version of sbt-sammy
 
 # Setup
 
@@ -26,14 +29,7 @@ addSbtPlugin("com.github.zainab-ali" % "sbt-sammmy" % "0.1.0")
 
 `sbt-sammy` can reduce its warning threshold to the maximum number of warnings in your codebase.  This means that each time you make a positive change, you can reduce your warning threshold.
 
-If you want to do this:
-
-1. Create a `sammy.sbt` file next to your `build.sbt` with the following contents:
-   ```
-   sammyWarningThreshold := 1000
-   ```
-2. Run `sbt policeWarnings`
-   The warning threshold should decrease to the maximum number of warnings in your project.
+If you want to do this, simply run `sbt policeWarnings`. The warning threshold should decrease to the maximum number of warnings in your project.
 
 ## With a fixed threshold
 

@@ -1,4 +1,7 @@
+import sbt.io.IO
+import scala.sys.process.Process
 import ReleaseTransformations._
+
 enablePlugins(SbtPlugin)
 
 scalaVersion := "2.12.8"
@@ -7,6 +10,7 @@ name := "sbt-sammy"
 description := "A friendly policer of compiler warnings"
 licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0.html"))
 
+// Taken from @tpolecat's https://tpolecat.github.io/2017/04/25/scalac-flags.html
 scalacOptions ++= Seq(
   "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
   "-encoding", "utf-8",                // Specify character encoding used by source files.
@@ -66,9 +70,28 @@ releaseProcess := Seq[ReleaseStep](
   commitReleaseVersion,
   tagRelease,
   releaseStepCommandAndRemaining("^ publish"),
+  releaseStepTask(updateVersionInExampleProject),
   setNextVersion,
   commitNextVersion,
   pushChanges
 )
 
-scriptedLaunchOpts := scriptedLaunchOpts.value ++ Seq("-Dplugin.version=" + version.value)
+/** Inspired by https://github.com/cb372/sbt-explicit-dependencies/blob/master/build.sbt - thank you @cb372! */
+lazy val updateVersionInExampleProject = taskKey[Unit]("update the version of the plugin used in the example project")
+updateVersionInExampleProject := {
+  val pluginsFile = baseDirectory.value / "example/project/plugins.sbt"
+  val content =
+    s"""addSbtPlugin("com.github.zainab-ali" % "sbt-sammy" % "${version.value}")"""
+  IO.write(pluginsFile, content)
+
+  val gitCommand = List(
+    "git",
+    "commit",
+    "-m", "Update plugin version in example project",
+    "example/project/plugins.sbt"
+  )
+  Process(gitCommand).!
+}
+
+
+scriptedLaunchOpts ++= Seq("-Dplugin.version=" + version.value)

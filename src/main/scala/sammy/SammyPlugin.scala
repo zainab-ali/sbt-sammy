@@ -21,8 +21,9 @@ object SammyPlugin extends AutoPlugin {
   override def requires = empty
 
   lazy val baseSammySettings: Seq[Def.Setting[_]] = Seq(
-    sammyWarningThresholdFile := Some(baseDirectory.value / "sammy.sbt"),
-    policeWarnings := Sammy.policeWarningsTask.value,
+    sammyWarningThreshold in ThisBuild := Int.MaxValue,
+    sammyWarningThresholdFile in ThisBuild := Some(baseDirectory.value / "sammy.sbt"),
+    policeWarnings in ThisBuild := Sammy.policeWarningsTask.value,
   )
 
   override lazy val projectSettings: Seq[Def.Setting[_]] = baseSammySettings

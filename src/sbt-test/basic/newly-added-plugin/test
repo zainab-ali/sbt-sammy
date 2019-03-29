@@ -1,0 +1,4 @@
+# The task should succeed as the threshold was met
+> policeWarnings
+# The threshold file should not have been written
+$ exists sammy.sbt
