@@ -1,4 +1,6 @@
-# The task should fail as the threshold was exceeded
+# The command should succeed as the threshold was reduced
 > policeWarnings
 # The threshold should have been reduced
 $ must-mirror sammy.sbt resources/updatedSammy.sbt
+# The threshold setting should have been updated
+> check

@@ -1,4 +1,4 @@
-# The task should succeed as the threshold was met
+# The command should succeed as the threshold was met
 > policeWarnings
-# The threshold file should not have been written
+# The threshold file should have been written
 $ exists sammy.sbt
