@@ -1,2 +1,2 @@
-# The task should fail as the threshold was exceeded
--> checkWarningThreshold
+# The command should fail as the threshold was exceeded
+-> policeWarnings

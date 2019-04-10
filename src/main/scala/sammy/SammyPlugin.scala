@@ -8,11 +8,11 @@ import xsbti.compile.CompileAnalysis
 object SammyPlugin extends AutoPlugin {
 
   object autoImport {
-    val sammyWarningThreshold = settingKey[Int]("The maximum number of warnings your project is allowed to have")
+    val sammyWarningThreshold = settingKey[Int](
+      "The maximum number of warnings your project is allowed to have")
     val sammyWarningThresholdFile =
-      settingKey[Option[File]]("The file to write the warning threshold to.  This should be empty if you don't want to update warnings.")
-    val policeWarnings = taskKey[Unit](
-      "Check that the number of warnings is lower than the configured threshold.  Writes the new threshold to the warning file, if desired")
+      settingKey[Option[File]](
+        "The file to write the warning threshold to.  This should be empty if you don't want to update warnings.")
   }
 
   import autoImport._
@@ -22,8 +22,9 @@ object SammyPlugin extends AutoPlugin {
 
   lazy val baseSammySettings: Seq[Def.Setting[_]] = Seq(
     sammyWarningThreshold in ThisBuild := Int.MaxValue,
-    sammyWarningThresholdFile in ThisBuild := Some(baseDirectory.value / "sammy.sbt"),
-    policeWarnings in ThisBuild := Sammy.policeWarningsTask.value,
+    sammyWarningThresholdFile in ThisBuild := Some(
+      baseDirectory.value / "sammy.sbt"),
+    commands in ThisBuild += Sammy.policeWarningsCommand
   )
 
   override lazy val projectSettings: Seq[Def.Setting[_]] = baseSammySettings
@@ -46,32 +47,63 @@ object Sammy {
 
 """
 
-  lazy val policeWarningsTask = Def.task {
-    val log = streams.value.log
+  lazy val policeWarningsCommandName: String = "policeWarnings"
+  lazy val policeWarningsBriefHelp: String =
+    "Checks that the compiler warning threshold is met"
+  lazy val policeWarningsDetail: String = s"""
+$policeWarningsCommandName
 
-    val threshold = sammyWarningThreshold.value
+         Checks that the number of warnings produced by the compile and test tasks does not exceed the value of the sammyWarningThreshold setting.
+         If the number of warnings has been reduced, the sammyWarningThreshold is reduced to equal it.
+         If the sammyWarningThresholdFile setting has been provided, the new sammyWarningThreshold is also persisted to a file
+"""
 
-    val compileAnalysis = (Compile / compile).value
-    val testAnalysis = (Test / compile).value
-    val count = warningCount(compileAnalysis) + warningCount(testAnalysis)
+  lazy val policeWarningsCommand = Command.command(
+    policeWarningsCommandName,
+    policeWarningsBriefHelp,
+    policeWarningsDetail
+  )(policeWarnings)
+
+  private def policeWarnings: State => State = { state =>
+    val log = state.log
+
+    val extracted: Extracted = Project.extract(state)
+    val thresholdFile = extracted.get(sammyWarningThresholdFile)
+    val threshold = extracted.get(sammyWarningThreshold)
+    val (state0, compileAnalysis) = runTask(compile in Compile)(state)
+    val (state1, testAnalysis) = runTask(compile in Test)(state0)
+
+    val analyses = List(compileAnalysis, testAnalysis)
+    val count = analyses.map(warningCount).sum
 
     log.info(s"Detected $count compiler warnings")
 
     count compare threshold match {
       case 0 =>
+        log.info("The number of compiler warnings remains the same")
+        state
       case n if n > 0 =>
-        throw new WarningThresholdExceededException(count, threshold)
+        log.error(
+          s"The number of warnings has increased from $threshold to $count.  Please reduce warnings in your project.")
+        state.fail
       case n if n < 0 =>
         val removed = threshold - count
         log.info(
           s"Thanks! You have removed $removed warnings from the codebase. Have a cup of tea for a job well done:")
         log.info(cupOfTea)
 
-        sammyWarningThresholdFile.value.foreach { file =>
+        thresholdFile.foreach { file =>
           log.info(s"Setting new warning threshold to $count")
           writeWarningThreshold(file, count)
         }
+        updateWarningThresholdSetting(count)(state1)
     }
+  }
+
+  /** Run an sbt task */
+  private def runTask[A](task: TaskKey[A])(state: State): (State, A) = {
+    val extracted: Extracted = Project.extract(state)
+    extracted.runTask(task, state)
   }
 
   /** Counts the number of warnings produced by a compile analysis stage */
@@ -89,5 +121,13 @@ object Sammy {
     val warningThresholdString =
       s"sammyWarningThreshold in ThisBuild := $warningThreshold"
     IO.writeLines(file, Seq(warningThresholdString))
+  }
+
+  /** Updates the warning threshold setting */
+  private def updateWarningThresholdSetting(
+      warningThreshold: Int): State => State = { state =>
+    val extracted = Project extract state
+    extracted.appendWithSession(Seq(sammyWarningThreshold := warningThreshold),
+                                state)
   }
 }
