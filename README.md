@@ -20,7 +20,7 @@ This plugin requires sbt 1.0+.
 Add this to your `project/plugins.sbt` or as a global plugin in `~/.sbt/1.0/plugins/plugins.sbt`:
 
 ```scala
-addSbtPlugin("com.github.zainab-ali" % "sbt-sammmy" % version)
+addSbtPlugin("com.github.zainab-ali" % "sbt-sammy" % version)
 ```
 
 Where `version` is set to the latest version of sbt-sammy
