@@ -38,7 +38,7 @@ If you want to do this, simply run `sbt policeWarnings`. The warning threshold s
 If you would like to enforce a fixed threshold that `sbt-sammy` won't reduce then add the following to your `build.sbt`:
 
 ```scala
-sammyWarningFile := None
+sammyWarningThresholdFile := None
 sammyWarningThreshold := yourFixedThreshold
 ```
 
