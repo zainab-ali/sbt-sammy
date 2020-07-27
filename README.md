@@ -42,6 +42,16 @@ sammyWarningThresholdFile := None
 sammyWarningThreshold := yourFixedThreshold
 ```
 
+## With suggestions
+
+`sbt-sammy` is geared towards incremental fixes, and can suggest files to be fixed.  It does this by diffing the files with warnings with those in a changeset. You need to supply it with a `sammyDiffCommand` that generates a list of changed files.
+
+For example, if you would like to look for changes between the current branch and the master:
+
+```scala
+sammyDiffCommand := Some("git diff --name-only master...HEAD")
+```
+
 # Run
 
 Run `sbt policeWarnings`.  This task will fail if the number of warnings exceeds the threshold.
