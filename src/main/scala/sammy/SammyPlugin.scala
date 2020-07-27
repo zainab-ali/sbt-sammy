@@ -1,5 +1,10 @@
 package sammy
 
+import java.io.File
+
+import scala.collection.JavaConverters._
+import scala.sys.process._
+
 import sbt._
 import sbt.Keys._
 import sbt.internal.inc.Analysis
@@ -13,6 +18,8 @@ object SammyPlugin extends AutoPlugin {
     val sammyWarningThresholdFile =
       settingKey[Option[File]](
         "The file to write the warning threshold to.  This should be empty if you don't want to update warnings.")
+
+    val sammyDiffCommand = settingKey[Option[String]]("The command to use to produce a list of recommended files")
   }
 
   import autoImport._
@@ -24,6 +31,7 @@ object SammyPlugin extends AutoPlugin {
     sammyWarningThreshold in ThisBuild := Int.MaxValue,
     sammyWarningThresholdFile in ThisBuild := Some(
       baseDirectory.value / "sammy.sbt"),
+    sammyDiffCommand in ThisBuild := None,
     commands in ThisBuild += Sammy.policeWarningsCommand
   )
 
@@ -70,15 +78,18 @@ $policeWarningsCommandName
     val extracted: Extracted = Project.extract(state)
     val thresholdFile = extracted.get(sammyWarningThresholdFile)
     val threshold = extracted.get(sammyWarningThreshold)
+    val diffCommand = extracted.get(sammyDiffCommand)
+    val baseDir = extracted.get(baseDirectory)
     val (state0, compileAnalysis) = runTask(compile in Compile)(state)
     val (state1, testAnalysis) = runTask(compile in Test)(state0)
 
     val analyses = List(compileAnalysis, testAnalysis)
+
     val count = analyses.map(warningCount).sum
 
     log.info(s"Detected $count compiler warnings")
 
-    count compare threshold match {
+    val next = count compare threshold match {
       case 0 =>
         log.info("The number of compiler warnings remains the same")
         state
@@ -96,7 +107,30 @@ $policeWarningsCommandName
           log.info(s"Setting new warning threshold to $count")
           writeWarningThreshold(file, count)
         }
+
         updateWarningThresholdSetting(count)(state1)
+    }
+
+    diffCommand.foreach(suggestFixes(log, baseDir, analyses.collect { case a: Analysis => a }, _))
+
+    next
+  }
+
+  /** Log a list of suggested files to fix */
+  private def suggestFixes(log: Logger, baseDirectory: File, analyses: List[Analysis], diffCommand: String) = {
+    val diffFiles = (diffCommand.!!).split("\n").map(_.trim).filter(_.nonEmpty).map(new File(baseDirectory, _))
+    log.debug(s"Diff produced paths:")
+    diffFiles.map(f => log.debug(f.toString))
+    val warningFiles = analyses.flatMap(_.infos.getAllSourceInfos().keySet.asScala.toList)
+    log.debug(s"Warnings produced paths:")
+    warningFiles.map(f => log.debug(f.toString))
+    val recommendedFiles = diffFiles.toSet.intersect(warningFiles.toSet)
+
+    if (recommendedFiles.size > 0) {
+    log.info(s"Sammy suggests fixing the following ${recommendedFiles.size} files:")
+    recommendedFiles.foreach(f => log.info(s" - $f"))
+    } else {
+      log.info("Sammy has no suggestions.")
     }
   }
 
