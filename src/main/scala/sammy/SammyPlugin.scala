@@ -121,14 +121,34 @@ $policeWarningsCommandName
     val diffFiles = (diffCommand.!!).split("\n").map(_.trim).filter(_.nonEmpty).map(new File(baseDirectory, _))
     log.debug(s"Diff produced paths:")
     diffFiles.map(f => log.debug(f.toString))
-    val warningFiles = analyses.flatMap(_.infos.getAllSourceInfos().keySet.asScala.toList)
+
+    val warningFiles = analyses.flatMap(_.infos.getAllSourceInfos().asScala.toList)
+    .filter { case (_, info) =>
+      (info.getReportedProblems ++ info.getUnreportedProblems).toList.nonEmpty
+    }.map { case (file, _) => file }
+    .toSet
     log.debug(s"Warnings produced paths:")
     warningFiles.map(f => log.debug(f.toString))
+
     val recommendedFiles = diffFiles.toSet.intersect(warningFiles.toSet)
+    val recommendedFixes = analyses.flatMap(_.infos
+      .getAllSourceInfos()
+      .asScala
+      .filter { case (file, _) => diffFiles.contains(file)}
+      .toList)
 
     if (recommendedFiles.size > 0) {
-    log.info(s"Sammy suggests fixing the following ${recommendedFiles.size} files:")
-    recommendedFiles.foreach(f => log.info(s" - $f"))
+      log.info(s"Sammy suggests fixes in the following ${recommendedFiles.size} files:")
+      recommendedFixes.foreach { case (file, sourceInfo) =>
+        log.info(s"Within ${file}:")
+        sourceInfo.getReportedProblems.foreach { p =>
+          log.info(s"Reported: Line ${p.position.line} - ${p.message}")
+        }
+        sourceInfo.getUnreportedProblems.foreach { p =>
+          log.info(s"Unreported: Line ${p.position.line} - ${p.message}")
+        }
+      }
+    // recommendedFiles.foreach(f => log.info(s" - $f"))
     } else {
       log.info("Sammy has no suggestions.")
     }
