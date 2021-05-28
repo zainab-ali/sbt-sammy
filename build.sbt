@@ -4,7 +4,7 @@ import ReleaseTransformations._
 
 enablePlugins(SbtPlugin)
 
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.14"
 organization := "com.github.zainab-ali"
 name := "sbt-sammy"
 description := "A friendly policer of compiler warnings"
