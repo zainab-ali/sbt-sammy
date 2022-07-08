@@ -1,4 +1,4 @@
-scalaVersion := "2.12.8"
+scalaVersion := "2.12.16"
 name := "example"
 
 scalacOptions ++= Seq(
