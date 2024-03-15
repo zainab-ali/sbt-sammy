@@ -1,5 +1,7 @@
 # sbt-sammy
 
+**NOTE** This project is no longer under development.
+
 [![Build Status](https://travis-ci.org/zainab-ali/sbt-sammy.svg?branch=master)](https://travis-ci.org/zainab-ali/sbt-sammy)
 
 [![Download](https://api.bintray.com/packages/zainab-ali/sbt-plugins/sbt-sammy/images/download.svg)](https://bintray.com/zainab-ali/sbt-plugins/sbt-sammy/_latestVersion)
